@@ -1,5 +1,5 @@
 'use client';
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { getTeacherStats, getTeacherContent } from '@/services/content.service';
 import { useAsyncData } from '@/hooks/useAsyncData';
@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/Button';
 import { ROLES } from '@/lib/constants';
 import { LayoutDashboard, Upload, BookOpen, Clock, CheckCircle2, XCircle, Plus } from 'lucide-react';
 import Link from 'next/link';
+import { Modal } from '@/components/ui/Modal';
 
 export default function TeacherDashboardPage() {
   const { user } = useAuth();
+  const [previewTarget, setPreviewTarget] = useState(null);
 
   const {
     data: stats,
@@ -106,11 +108,39 @@ export default function TeacherDashboardPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {recent.map((item) => (
-              <ContentCard key={item.id} content={item} />
+              <ContentCard 
+                key={item.id} 
+                content={item} 
+                onPreview={setPreviewTarget}
+              />
             ))}
           </div>
         )}
       </section>
+
+      {/* Preview Modal */}
+      <Modal
+        isOpen={!!previewTarget}
+        onClose={() => setPreviewTarget(null)}
+        title={`Preview: ${previewTarget?.title}`}
+        size="lg"
+      >
+        <div className="flex flex-col gap-4">
+          <div className="bg-slate-900 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+            {previewTarget?.fileUrl && (
+              <img src={previewTarget.fileUrl} alt="Preview" className="w-full h-auto max-h-[60vh] object-contain mx-auto" />
+            )}
+          </div>
+          <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-xs">
+            <p className="text-white/40 mb-1">Subject</p>
+            <p className="text-white font-medium">{previewTarget?.subject}</p>
+          </div>
+          <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+            <p className="text-xs text-white/40 mb-1">Description</p>
+            <p className="text-sm text-white/60 leading-relaxed">{previewTarget?.description || 'No description provided.'}</p>
+          </div>
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 }

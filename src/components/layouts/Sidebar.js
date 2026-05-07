@@ -146,14 +146,14 @@ export function Sidebar() {
       {/* Desktop sidebar */}
       <div
         className={cn(
-          'hidden lg:flex flex-col h-screen sticky top-0 bg-gradient-to-b from-slate-900 to-indigo-950 border-r border-white/10 transition-all duration-300',
+          'hidden lg:flex flex-col h-screen sticky top-0 bg-gradient-to-b from-slate-900 to-indigo-950 border-r border-white/10 transition-all duration-300 z-40',
           collapsed ? 'w-[68px]' : 'w-64'
         )}
       >
         {/* Collapse toggle */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-8 z-10 p-1 bg-slate-800 border border-white/20 rounded-full text-white/50 hover:text-white transition-all"
+          className="absolute -right-3 top-8 z-50 p-1 bg-slate-800 border border-white/20 rounded-full text-white/50 hover:text-white transition-all shadow-lg"
         >
           <ChevronRight className={cn('h-3 w-3 transition-transform duration-300', collapsed ? '' : 'rotate-180')} />
         </button>

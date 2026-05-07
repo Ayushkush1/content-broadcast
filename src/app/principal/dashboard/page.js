@@ -1,5 +1,5 @@
 'use client';
-import { useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { getPrincipalStats, getAllContent } from '@/services/content.service';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { DashboardLayout } from '@/components/layouts/DashboardLayout';
@@ -11,8 +11,11 @@ import { Button } from '@/components/ui/Button';
 import { ROLES, CONTENT_STATUS } from '@/lib/constants';
 import { LayoutDashboard, CheckSquare, List, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import Link from 'next/link';
+import { Modal } from '@/components/ui/Modal';
 
 export default function PrincipalDashboardPage() {
+  const [previewTarget, setPreviewTarget] = useState(null);
+
   const { data: stats, isLoading: statsLoading, error: statsError } = useAsyncData(
     useCallback(() => getPrincipalStats(), []),
     []
@@ -74,7 +77,7 @@ export default function PrincipalDashboardPage() {
         </div>
 
         {pendingLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {Array(4).fill(0).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : pendingItems.length === 0 ? (
@@ -84,13 +87,47 @@ export default function PrincipalDashboardPage() {
             description="No content is pending approval right now."
           />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {pendingItems.map((item) => (
-              <ContentCard key={item.id} content={item} />
+              <ContentCard 
+                key={item.id} 
+                content={item} 
+                onPreview={setPreviewTarget}
+              />
             ))}
           </div>
         )}
       </section>
+
+      {/* Preview Modal */}
+      <Modal
+        isOpen={!!previewTarget}
+        onClose={() => setPreviewTarget(null)}
+        title={`Preview: ${previewTarget?.title}`}
+        size="lg"
+      >
+        <div className="flex flex-col gap-4">
+          <div className="bg-slate-900 rounded-xl overflow-hidden border border-white/10 shadow-2xl">
+            {previewTarget?.fileUrl && (
+              <img src={previewTarget.fileUrl} alt="Preview" className="w-full h-auto max-h-[60vh] object-contain mx-auto" />
+            )}
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+              <p className="text-white/40 mb-1">Teacher</p>
+              <p className="text-white font-medium">{previewTarget?.teacherName}</p>
+            </div>
+            <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+              <p className="text-white/40 mb-1">Subject</p>
+              <p className="text-white font-medium">{previewTarget?.subject}</p>
+            </div>
+          </div>
+          <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+            <p className="text-xs text-white/40 mb-1">Description</p>
+            <p className="text-sm text-white/60 leading-relaxed">{previewTarget?.description || 'No description provided.'}</p>
+          </div>
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 }

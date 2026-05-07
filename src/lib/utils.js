@@ -78,12 +78,12 @@ export function safeGet(obj, path, fallback = null) {
 export function getStatusClasses(status) {
   switch (status) {
     case CONTENT_STATUS.APPROVED:
-      return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+      return 'bg-emerald-500/80 text-white border-emerald-400/50 backdrop-blur-md shadow-sm';
     case CONTENT_STATUS.REJECTED:
-      return 'bg-red-500/20 text-red-400 border-red-500/30';
+      return 'bg-red-500/80 text-white border-red-400/50 backdrop-blur-md shadow-sm';
     case CONTENT_STATUS.PENDING:
     default:
-      return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+      return 'bg-amber-500/80 text-white border-amber-400/50 backdrop-blur-md shadow-sm';
   }
 }
 
@@ -93,12 +93,12 @@ export function getStatusClasses(status) {
 export function getScheduleStatusClasses(scheduleStatus) {
   switch (scheduleStatus) {
     case 'active':
-      return 'bg-green-500/20 text-green-400 border-green-500/30';
+      return 'bg-green-500/80 text-white border-green-400/50 backdrop-blur-md shadow-sm';
     case 'expired':
-      return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+      return 'bg-gray-600/80 text-white border-gray-500/50 backdrop-blur-md shadow-sm';
     case 'scheduled':
     default:
-      return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      return 'bg-blue-500/80 text-white border-blue-400/50 backdrop-blur-md shadow-sm';
   }
 }
 

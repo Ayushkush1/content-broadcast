@@ -45,7 +45,7 @@ export function StatCard({ icon: Icon, label, value, color = 'violet', trend }) 
             {Icon && <Icon className={cn('h-6 w-6', colorMap[color].split(' ').pop())} />}
           </div>
           {trend !== undefined && (
-            <span className={cn('text-xs font-medium px-2 py-1 rounded-full', trend >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400')}>
+            <span className={cn('text-xs font-semibold px-2 py-1 rounded-full backdrop-blur-md shadow-sm', trend >= 0 ? 'bg-emerald-500/80 text-white' : 'bg-red-500/80 text-white')}>
               {trend >= 0 ? '+' : ''}{trend}%
             </span>
           )}

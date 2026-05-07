@@ -3,13 +3,13 @@ import { cn, getStatusClasses, getScheduleStatusClasses } from '@/lib/utils';
 
 export function Badge({ children, variant = 'default', className = '' }) {
   const variants = {
-    default: 'bg-white/10 text-white/70 border-white/20',
-    pending: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    approved: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    rejected: 'bg-red-500/20 text-red-400 border-red-500/30',
-    active: 'bg-green-500/20 text-green-400 border-green-500/30',
-    scheduled: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    expired: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+    default: 'bg-white/20 text-white border-white/30 backdrop-blur-md shadow-sm',
+    pending: 'bg-amber-500/80 text-white border-amber-400/50 backdrop-blur-md shadow-sm',
+    approved: 'bg-emerald-500/80 text-white border-emerald-400/50 backdrop-blur-md shadow-sm',
+    rejected: 'bg-red-500/80 text-white border-red-400/50 backdrop-blur-md shadow-sm',
+    active: 'bg-green-500/80 text-white border-green-400/50 backdrop-blur-md shadow-sm',
+    scheduled: 'bg-blue-500/80 text-white border-blue-400/50 backdrop-blur-md shadow-sm',
+    expired: 'bg-gray-600/80 text-white border-gray-500/50 backdrop-blur-md shadow-sm',
   };
 
   return (

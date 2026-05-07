@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { formatDateTime, getScheduleStatus, truncate } from '@/lib/utils';
+import { cn, formatDateTime, getScheduleStatus, truncate } from '@/lib/utils';
 import { Card } from '@/components/ui/Card';
 import { StatusBadge, ScheduleBadge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -19,30 +19,36 @@ export function ContentCard({
 
   return (
     <Card className="overflow-hidden flex flex-col group">
-      {/* Image Preview */}
-      <div className="relative h-48 bg-gradient-to-br from-slate-800 to-indigo-900 overflow-hidden flex-shrink-0">
+      {/* Image Preview Area */}
+      <div 
+        className={cn(
+          "relative h-48 bg-gradient-to-br from-slate-800 to-indigo-900 overflow-hidden flex-shrink-0 group-hover:opacity-90 transition-opacity",
+          onPreview && "cursor-pointer"
+        )}
+        onClick={() => onPreview?.(content)}
+      >
         {content.fileUrl ? (
           <img
             src={content.fileUrl}
             alt={content.title}
-            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${onPreview ? 'cursor-pointer' : ''}`}
-            onClick={() => onPreview?.(content)}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
               e.target.style.display = 'none';
               e.target.nextSibling.style.display = 'flex';
             }}
           />
         ) : null}
-        <div className="w-full h-full hidden items-center justify-center">
-          <BookOpen className="h-16 w-16 text-white/20" />
+        <div className={cn("w-full h-full items-center justify-center bg-slate-800/50", content.fileUrl ? "hidden" : "flex")}>
+          <BookOpen className="h-16 w-16 text-white/10" />
         </div>
+        
         {/* Overlay badges */}
-        <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
+        <div className="absolute top-3 left-3 flex gap-2 flex-wrap pointer-events-none">
           <StatusBadge status={content.status} />
           <ScheduleBadge scheduleStatus={scheduleStatus} />
         </div>
         {content.rotationDuration && (
-          <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/60 text-white/80 text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+          <div className="absolute top-3 right-3 flex items-center gap-1 bg-black/70 text-white text-xs font-bold px-2 py-1 rounded-full backdrop-blur-md shadow-sm border border-white/10 pointer-events-none">
             <Clock className="h-3 w-3" />
             {content.rotationDuration}s
           </div>
@@ -53,8 +59,13 @@ export function ContentCard({
       <div className="flex-1 flex flex-col p-5">
         <div className="flex-1 space-y-3">
           {/* Title & subject */}
-          <div>
-            <h3 className="font-bold text-white text-base leading-snug line-clamp-2">{content.title}</h3>
+          <div 
+            className={cn(onPreview && "cursor-pointer group/title")}
+            onClick={() => onPreview?.(content)}
+          >
+            <h3 className="font-bold text-white text-base leading-snug line-clamp-2 group-hover/title:text-violet-300 transition-colors">
+              {content.title}
+            </h3>
             <div className="flex items-center gap-2 mt-1.5">
               <span className="inline-flex items-center gap-1 text-xs text-violet-400 font-medium">
                 <BookOpen className="h-3 w-3" />
