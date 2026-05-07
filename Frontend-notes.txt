@@ -1,0 +1,150 @@
+Content Broadcasting System - Technical Documentation
+=================================================
+
+ARCHITECTURE OVERVIEW
+---------------------
+This project follows a modular React/Next.js architecture designed for high 
+scalability and clear separation of concerns.
+
+1. DIRECTORY STRUCTURE
+----------------------
+src/
+  app/         -> Routing and page-level logic (App Router)
+  components/  -> UI components and feature-based modules
+  context/     -> Global state management (Authentication)
+  hooks/       -> Reusable logic (Async fetching, Polling)
+  services/    -> Data fetching layer (Isolates API logic)
+  lib/         -> Shared utilities and constants
+  layouts/     -> Persistent UI wrappers
+│
+├── components/
+│   ├── ui/                     # Atomic design tokens
+│   │   ├── Button.js           # Multi-variant button
+│   │   ├── Card.js             # Card + StatCard
+│   │   ├── Badge.js            # Status + schedule badges
+│   │   ├── Input.js            # Input, Textarea, Select
+│   │   ├── Modal.js            # Accessible overlay modal
+│   │   ├── Skeleton.js         # Loading placeholders
+│   │   └── Alert.js            # Alert + EmptyState
+│   ├── layouts/
+│   │   ├── Sidebar.js          # Collapsible sidebar (mobile + desktop)
+│   │   ├── TopBar.js           # Page header bar
+│   │   └── DashboardLayout.js  # Protected layout wrapper
+│   └── content/
+│       ├── ContentCard.js      # Reusable content preview card
+│       ├── UploadContentForm.js # Upload form with drag-and-drop
+│       └── RejectModal.js      # Reject with mandatory reason
+│
+├── context/
+│   └── AuthContext.js          # Global auth state + login/logout
+│
+├── hooks/
+│   └── useAsyncData.js         # Generic fetch hook + polling + debounce
+│
+├── services/                   # API service layer (NO direct calls in components)
+│   ├── auth.service.js         # login, logout, getMe
+│   ├── content.service.js      # CRUD, stats, live feed
+│   └── approval.service.js     # approve, reject
+│
+├── lib/
+│   ├── constants.js            # App-wide constants
+│   ├── utils.js                # Pure utility functions
+│   └── apiClient.js            # Axios instance with interceptors
+
+2. AUTHENTICATION FLOW
+-----------------------
+1. User visits /login and enters credentials.
+2. LoginPage calls login() from AuthContext.
+3. AuthContext calls auth.service.js → login() (mock or real API).
+4. On success: token + user object stored in localStorage.
+5. Axios request interceptor automatically attaches Bearer token.
+6. Axios 401 interceptor clears storage and redirects to /login.
+7. AuthProvider rehydrates state from localStorage on refresh.
+8. DashboardLayout checks isAuthenticated on mount; redirects if false.
+
+3. ROLE-BASED ROUTING
+----------------------
+Roles: 'teacher', 'principal' (student = public, no auth needed)
+
+- /login → Redirects to role-specific dashboard on success
+- /teacher/* → Protected by DashboardLayout (allowedRole='teacher')
+- /principal/* → Protected by DashboardLayout (allowedRole='principal')
+- /live/[teacherId] → Public, no auth required
+
+DashboardLayout enforces:
+  a) Must be authenticated (or redirect to /login)
+  b) Must match the required role (or redirect to their own dashboard)
+
+4. API INTEGRATION APPROACH
+-----------------------------
+All API calls are exclusively in src/services/*.service.js files.
+Components NEVER call APIs directly – they call service functions.
+
+Service layer responsibilities:
+  - Knows the API contract (endpoints, payloads, response shape)
+  - Handles mock vs real mode (NEXT_PUBLIC_USE_MOCK env var)
+  - Throws normalized Error objects with user-friendly messages
+
+apiClient.js:
+  - Axios instance with base URL from env
+  - Request interceptor: injects Authorization header
+  - Response interceptor: normalizes errors, handles 401
+
+To connect a real backend:
+  1. Set NEXT_PUBLIC_USE_MOCK=false in .env.local
+  2. Set NEXT_PUBLIC_API_URL to your backend base URL
+  3. All service functions will automatically use real endpoints
+
+5. STATE MANAGEMENT APPROACH
+------------------------------
+No external state library (Redux, Zustand) needed at this scale.
+
+Used:
+  - React Context (AuthContext) for global auth state only
+  - Local useState for page-level UI state (filters, modals, loading)
+  - Custom hook useAsyncData() for data fetching lifecycle
+  - Optimistic updates via setData() in async handlers
+
+useAsyncData hook provides:
+  - data, isLoading, error state
+  - execute() / refetch() for re-fetching
+  - setData() for optimistic mutations
+  - Cleans up on unmount (mountedRef pattern)
+
+usePolling() wraps useAsyncData with auto-refresh on interval.
+useDebounce() used for search input to avoid excessive API calls.
+
+6. FORM HANDLING & VALIDATION
+-------------------------------
+- React Hook Form for form state management
+- Zod schemas for schema-based validation
+- @hookform/resolvers/zod to bridge them
+
+Upload form validation:
+  - title: min 3, max 120 chars
+  - subject: required selection
+  - startTime / endTime: required; endTime > startTime (cross-field rule)
+  - rotationDuration: 5–300 seconds
+  - file: type (jpg/png/gif), size (≤ 10MB), validated outside RHF
+
+7. ASSUMPTIONS
+--------------
+- A real backend is expected to accept multipart/form-data for uploads
+- The mock data store lives in content.service.js (in-memory, resets on page reload)
+- Teacher IDs are static in the mock (teacher-1, teacher-2)
+  → Live page: /live/teacher-1 or /live/teacher-2 shows active content
+- Scheduling status is derived client-side from start/end times
+- No persistent session server-side in mock mode (token is fake)
+- Toasts use react-hot-toast positioned top-right
+- Image previews use Picsum for mock data; real data would use actual URLs
+- The 'student' role is not authenticated – /live/* is fully public
+
+8. PERFORMANCE NOTES
+---------------------
+- useCallback/useMemo used in all page-level handlers
+- useDebounce prevents search from firing on every keystroke
+- Skeleton loaders shown during all async operations
+- ContentCard images have CSS transition for zoom-on-hover
+- Sidebar collapse reduces DOM footprint on smaller screens
+- No unnecessary re-renders: deps arrays carefully managed
+- Table rows use group-hover for action reveal (avoids stale closures)
